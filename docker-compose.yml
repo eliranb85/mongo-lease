@@ -1,0 +1,25 @@
+# Local MongoDB plus a horizontally scaled example scheduler.
+#
+#   docker compose up -d mongo              # just the database, for `npm test`
+#   docker compose up --build --scale worker=3
+#
+# With three workers, exactly one logs "LEADER", and jobs are spread across all three.
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  worker:
+    build: .
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      TICK_MS: "3000"
+    depends_on:
+      mongo:
+        condition: service_healthy

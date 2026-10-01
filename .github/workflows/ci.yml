@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Typecheck, test, build (Node ${{ matrix.node }}, MongoDB ${{ matrix.mongo }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+        mongo: ["6.0", "7.0"]
+    services:
+      mongo:
+        image: mongo:${{ matrix.mongo }}
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok'"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      MONGODB_URI: mongodb://localhost:27017
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+
+  compose:
+    name: Docker Compose smoke test (3 replicas, 1 leader)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start MongoDB and three workers
+        run: docker compose up -d --build --scale worker=3
+      - name: Let them run
+        run: sleep 25
+      - name: Exactly one leader, and jobs completed by more than one worker
+        run: |
+          docker compose logs worker > logs.txt
+          cat logs.txt
+          leaders=$(grep -c "LEADER " logs.txt || true)
+          workers=$(grep "DONE " logs.txt | awk '{print $NF}' | sort -u | wc -l)
+          echo "leaders=$leaders distinct_workers=$workers"
+          test "$leaders" -eq 1
+          test "$workers" -ge 2
+      - if: always()
+        run: docker compose down -v

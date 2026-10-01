@@ -1,0 +1,47 @@
+{
+  "name": "mongo-lease",
+  "version": "0.1.0",
+  "description": "Leader election, lease locks and a deduplicating priority job queue on plain MongoDB. No Redis.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mongodb",
+    "leader-election",
+    "distributed-lock",
+    "lease",
+    "job-queue",
+    "scheduler"
+  ],
+  "author": "Eliran Bar-On",
+  "license": "MIT",
+  "peerDependencies": {
+    "mongodb": ">=6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "mongodb": "^7.7.0",
+    "mongodb-memory-server": "^11.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}
