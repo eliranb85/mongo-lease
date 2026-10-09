@@ -34,6 +34,14 @@
   ],
   "author": "Eliran Bar-On",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliranb85/mongo-lease.git"
+  },
+  "homepage": "https://github.com/eliranb85/mongo-lease#readme",
+  "bugs": {
+    "url": "https://github.com/eliranb85/mongo-lease/issues"
+  },
   "peerDependencies": {
     "mongodb": ">=6.0.0"
   },
